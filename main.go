@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"postgres/chat/pkg/db"
 	"postgres/chat/pkg/handler"
+	"postgres/chat/pkg/jwt"
 
 	"github.com/gorilla/mux"
 )
@@ -19,14 +20,14 @@ func main() {
 	router := mux.NewRouter()
 
 	//user management
-	router.HandleFunc("/api/register",handler.SignUpHandler).Methods("POST")
-	router.HandleFunc("/api/login",handler.SignInHandler).Methods("POST")
+	router.HandleFunc("/api/register", handler.SignUpHandler).Methods("POST")
+	router.HandleFunc("/api/login", handler.SignInHandler).Methods("POST")
 
 	//TODO: CREATE CHAT MANAGEMENT
 	//chat management
-	// router.HandleFunc("/api/chats").Methods("GET")
-	// router.HandleFunc("/api/chats").Methods("POST")
-	// router.HandleFunc("/api/chats/{chat_id}").Methods("GET")
+	router.HandleFunc("/api/chats", jwt.Authenticate(handler.GetChatHandler)).Methods("GET")
+	router.HandleFunc("/api/chats", jwt.Authenticate(handler.CreateChatHandler)).Methods("POST")
+	router.HandleFunc("/api/chats/{chat_id}", jwt.Authenticate(handler.GetChatInfoHandler)).Methods("GET")
 
 	//TODO: CREATE MESSAGE MANAGEMENT
 	//message management

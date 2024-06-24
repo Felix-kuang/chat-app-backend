@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -44,11 +45,18 @@ func verifyToken(tokenString string) (jwt.MapClaims, error) {
 
 func Authenticate(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		tokenString := r.Header.Get("Authorization")
-		if tokenString == "" {
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
 			http.Error(w, "unauthorized", http.StatusUnauthorized)
 			return
 		}
+		parts := strings.Split(authHeader, " ")
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			http.Error(w, "invalid token format", http.StatusUnauthorized)
+			return
+		}
+
+		tokenString := parts[1]
 
 		claims, err := verifyToken(tokenString)
 
